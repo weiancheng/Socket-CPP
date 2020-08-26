@@ -12,12 +12,13 @@
 
 #define BACKLOG 10
 
-using namespace std;
-
 #define TAG "TCPServer"
 #define LOGD(format, ...) printf("[%s][%s][%s][%d]: " format "\n", TAG, __FILENAME__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 #define LOGI(format, ...) printf("[%s] " format "\n", TAG, ##__VA_ARGS__)
 #define LOGE(format, ...) printf("[%s] Error: " format "\n", TAG, ##__VA_ARGS__)
+
+using namespace std;
+
 
 TCPServer::TCPServer(): sockfd(-1) {
 }
@@ -87,17 +88,17 @@ int TCPServer::sendToClient(int client_fd, char *data, int data_len) {
     }
 
     if (client_fd < 0) {
-        LOGE("client FD(%d) is invalid", client_fd);
+        LOGE("client FD(%d) is invalid...", client_fd);
         return -1;
     }
 
     if (data == nullptr) {
-        LOGE("buffer is null");
+        LOGE("buffer is null...");
         return -1;
     }
 
     if (data_len < 0) {
-        LOGE("data size is invalid");
+        LOGE("data size is invalid...");
         return -1;
     }
 
@@ -110,26 +111,26 @@ int TCPServer::sendToClient(int client_fd, char *data, int data_len) {
     return n;
 }
 
-int TCPServer::recvFromClient(int client_fd, char *data, int data_len) {
+int TCPServer::recvFromClient(int client_fd, char *buffer, int buffer_size) {
     if (sockfd < 0) {
         LOGE("need to create socket...");
         return -1;
     }
 
     if (client_fd < 0) {
-        LOGE("client FD(%d) is invalid", client_fd);
+        LOGE("client FD(%d) is invalid...", client_fd);
         return -1;
     }
 
-    if (data == nullptr) {
-        LOGE("buffer is null");
+    if (buffer == nullptr) {
+        LOGE("buffer is null...");
         return -1;
     }
 
-    if (data_len < 0) {
-        LOGE("data size is invalid");
+    if (buffer_size < 0) {
+        LOGE("buffer size is invalid...");
         return -1;
     }
 
-    return recv(client_fd, data, data_len, 0);
+    return recv(client_fd, buffer, buffer_size, 0);
 }

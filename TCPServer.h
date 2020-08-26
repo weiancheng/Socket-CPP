@@ -12,7 +12,7 @@ public:
     void stop();
     int waitForClient();
     int sendToClient(int client_fd, char *data, int data_len);
-    int recvFromClient(int client_fd, char *data, int data_len);
+    int recvFromClient(int client_fd, char *buffer, int buffer_size);
 
 private:
     int sockfd;
