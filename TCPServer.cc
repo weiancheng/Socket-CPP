@@ -72,7 +72,7 @@ int TCPServer::waitForClient() {
 
     LOGI("waiting for client's request...");
 
-    if ((client_fd = accept(sockfd, (struct sockaddr*) nullptr, nullptr)) == -1) {
+    if ((client_fd = accept(sockfd, (struct sockaddr*)&client_addr, &size)) == -1) {
         LOGE("accept socket error: %s (errno: %d)", strerror(errno), errno);
         return -1;
     }
@@ -81,7 +81,7 @@ int TCPServer::waitForClient() {
     return client_fd;
 }
 
-int TCPServer::sendToClient(int client_fd, char *data, int data_len) {
+int TCPServer::sendToClient(int client_fd, const char *data, int data_len) {
     if (sockfd < 0) {
         LOGE("need to create socket...");
         return -1;
@@ -102,7 +102,7 @@ int TCPServer::sendToClient(int client_fd, char *data, int data_len) {
         return -1;
     }
 
-    int n = send(sockfd, data, data_len, 0);
+    int n = send(client_fd, data, data_len, 0);
     if (n < 0) {
         LOGE("send data error: %s (errno: %d)", strerror(errno), errno);
         return -1;

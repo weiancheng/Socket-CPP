@@ -11,7 +11,7 @@ public:
     bool start(uint32_t port);
     void stop();
     int waitForClient();
-    int sendToClient(int client_fd, char *data, int data_len);
+    int sendToClient(int client_fd, const char *data, int data_len);
     int recvFromClient(int client_fd, char *buffer, int buffer_size);
 
 private:
