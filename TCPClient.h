@@ -11,11 +11,13 @@ public:
 
     bool start(std::string ip, uint32_t port);
     void stop();
-    int sendToServer(const char *data, int data_len);
-    int recvFromServer(char *buffer, int buffer_size);
+    int sendToServer(const void *buf, int len);
+    void sendEOFToServer();
+    int recvFromServer(void *buf, int len);
 
 private:
     int sockfd;
+    int count;
     struct sockaddr_in servaddr;
     bool isConnected;
 };

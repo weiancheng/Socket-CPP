@@ -11,11 +11,13 @@ public:
     bool start(uint32_t port);
     void stop();
     int waitForClient();
-    int sendToClient(int client_fd, const char *data, int data_len);
-    int recvFromClient(int client_fd, char *buffer, int buffer_size);
+    int sendToClient(int client_fd, const void *buf, int len);
+    void sendEOFToClient(int client_fd);
+    int recvFromClient(int client_fd, void *buf, int len);
 
 private:
     int sockfd;
+    int count;
     struct sockaddr_in servaddr;
 };
 

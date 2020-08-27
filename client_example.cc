@@ -7,17 +7,17 @@
 #include <string>
 #include <cstring>
 
-#define BUFFER_SIZE 4096
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 6666
+#define BUFFER_SIZE 4096
 
 using namespace std;
 
 
 int main(int argc, char **argv) {
     TCPClient client;
-    FILE *filp = nullptr;
     char buffer[BUFFER_SIZE];
+    FILE *filp = nullptr;
 
     filp = fopen("output.jpg", "wb");
     if (filp == nullptr) {
@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
     }
 
     while (1) {
-        memset(buffer, 0, BUFFER_SIZE);
         int length = client.recvFromServer(buffer, BUFFER_SIZE);
         if (length == 0) {
+            printf("got EOF...\n");
             break;
         }
 
@@ -43,9 +43,9 @@ int main(int argc, char **argv) {
         fwrite(buffer, sizeof(char), length, filp);
     }
 
-    client.stop();
-
+    printf("close file...\n");
     fclose(filp);
+    client.stop();
 
     return 0;
 }

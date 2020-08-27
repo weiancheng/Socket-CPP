@@ -1,4 +1,5 @@
 #include "TCPClient.h"
+#include "DataPackage.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,7 @@
 using namespace std;
 
 
-TCPClient::TCPClient(): sockfd(-1), isConnected(false) {
+TCPClient::TCPClient(): sockfd(-1), isConnected(false), count(0) {
 }
 
 TCPClient::~TCPClient() {
@@ -57,46 +58,80 @@ void TCPClient::stop() {
     isConnected = false;
 }
 
-int TCPClient::sendToServer(const char *data, int data_len) {
+int TCPClient::sendToServer(const void *buf, int len) {
     if (!isConnected) {
         LOGE("connection hasn't been created...");
         return -1;
     }
 
-    if (data == nullptr) {
+    if (buf == nullptr) {
         LOGE("buffer is null...");
         return -1;
     }
 
-    if (data_len < 0) {
-        LOGE("data size is invalid...");
-        return -1;
-    }
-
-    int n = send(sockfd, data, data_len, 0);
-    if (n < 0) {
-        LOGE("send data error: %s (errno: %d)", strerror(errno), errno);
-        return -1;
-    }
-
-    return n;
-}
-
-int TCPClient::recvFromServer(char *buffer, int buffer_size) {
-    if (!isConnected) {
-        LOGE("connection hasn't been created...");
-        return -1;
-    }
-
-    if (buffer == nullptr) {
-        LOGE("buffer is null...");
-        return -1;
-    }
-
-    if (buffer_size < 0) {
+    if (len < 0) {
         LOGE("buffer size is invalid...");
         return -1;
     }
 
-    return recv(sockfd, buffer, buffer_size, 0);
+    struct DataPackage package;
+    memset(&package, 0, sizeof(package));
+    package.index = count;
+    package.isEOF = false;
+    package.length = len;
+    memcpy(package.buffer, buf, len);
+
+    if (send(sockfd, (void *)&package, sizeof(package), 0)) {
+        LOGE("send data error: %s (errno: %d)", strerror(errno), errno);
+        return -1;
+    }
+
+    count++;
+
+    return package.length;
+}
+
+void TCPClient::sendEOFToServer() {
+    if (!isConnected) {
+        LOGE("connection hasn't been created...");
+        return;
+    }
+
+    struct DataPackage package;
+    memset(&package, 0, sizeof(package));
+    package.index = count;
+    package.isEOF = true;
+    package.length = 0;
+
+    if (send(sockfd, (void *)&package, sizeof(package), 0)) {
+        LOGE("send data error: %s (errno: %d)", strerror(errno), errno);
+    }
+
+    count = 0;
+}
+
+int TCPClient::recvFromServer(void *buf, int len) {
+    if (!isConnected) {
+        LOGE("connection hasn't been created...");
+        return -1;
+    }
+
+    if (buf == nullptr) {
+        LOGE("buffer is null...");
+        return -1;
+    }
+
+    if (len < 0) {
+        LOGE("buffer size is invalid...");
+        return -1;
+    }
+
+    struct DataPackage package;
+
+    recv(sockfd, (void *)&package, sizeof(package), 0);
+    if (package.isEOF)
+        return 0;
+
+    memcpy(buf, package.buffer, package.length);
+    return package.length;
 }
